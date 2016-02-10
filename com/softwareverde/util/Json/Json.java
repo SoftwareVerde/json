@@ -244,7 +244,9 @@ public class Json implements Jsonable {
                 try {
                     value = (T) new Integer(Integer.parseInt((String) obj));
                 }
-                catch (Exception e) { Json.debug("Exception 1: "+ e.getMessage()); }
+                catch (Exception e) {
+                    value = (T) new Integer(0);
+                }
             }
             else {
                 Json.debug("WARNING: Returning null for Json._convert. (Integer)");
@@ -261,7 +263,9 @@ public class Json implements Jsonable {
                 try {
                     value = (T) new Double(Double.parseDouble((String) obj));
                 }
-                catch (Exception e) { Json.debug("Exception 2: "+ e.getMessage()); }
+                catch (Exception e) {
+                    value = (T) new Double(0);
+                }
             }
             else {
                 Json.debug("WARNING: Returning null for Json._convert. (Double)");
@@ -278,7 +282,9 @@ public class Json implements Jsonable {
                 try {
                     value = (T) new Boolean((Integer.parseInt((String) obj) > 0));
                 }
-                catch (Exception e) { Json.debug("Exception 3: "+ e.getMessage()); }
+                catch (Exception e) {
+                    value = (T) new Boolean(false);
+                }
             }
             else {
                 Json.debug("WARNING: Returning null for Json._convert. (Boolean)");
