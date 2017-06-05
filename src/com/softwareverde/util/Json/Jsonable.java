@@ -26,16 +26,6 @@ package com.softwareverde.util;
 
 import java.util.Map;
 
-/*
-    - Objects that need to be compiled into a JSON string must implement the Jsonable interface.
-
-    - It may not be necessary for the object to meaningfully implement setJsonParameters().
-
-    - toJson() must compile the object's data into a Json object. setJsonParameters() can be used
-        to set flags used while compiling the object (i.e. excluding a long but unnecessary field).
-*/
-
 public interface Jsonable {
-    public void setJsonParameters(String key, String value);
     public Json toJson();
 }

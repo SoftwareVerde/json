@@ -1,0 +1,26 @@
+group 'com.softwareverde'
+version '0.1.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+task makeJar(type: Jar) {
+    manifest {
+        attributes  'Implementation-Title': 'Json Wrapper',
+                    'Implementation-Version': version
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.json', name: 'json', version: '20170516'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
