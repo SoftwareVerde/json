@@ -1,8 +1,9 @@
 # Json Wrapper for Java
 
-## Gradle Dependencies
-    compile 'commons-io:commons-io:2.4'
-    compile 'org.apache.commons:commons-lang3:3.1'
-    compile 'org.jsoup:jsoup:1.7.2'
-    compile 'org.json:json:20090211'
+Json Wrapper consolidates Json.OBJECT and Json.ARRAY into a single entity.
+Json is intelligently either an array or an object. By invoking the
+put(key, value) method, the Json object will become an Object. If
+values exist within the Json object before an invocation of put(),
+then the values will be indexed as stringified-integers; the index
+used will be smallest unused non-negative integer.
 
