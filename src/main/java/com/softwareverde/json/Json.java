@@ -1,7 +1,7 @@
 //  ****************************************************************************
 //  The MIT License (MIT)
 //
-//  Copyright (c) 2016 Joshua Green <josh@softwareverde.com>
+//  Copyright (c) 2017 Joshua Green <josh@softwareverde.com>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class Json implements Jsonable {
     private synchronized static void debug(final String str) {
-        System.out.println("com.softwareverde.util :: Json :: "+ str);
+        System.out.println("com.softwareverde.json :: "+ str);
     }
 
     private static Json _fromString(final String jsonString) throws JSONException {
@@ -61,7 +61,6 @@ public class Json implements Jsonable {
         return json;
     }
 
-
     private static Integer _coerceInteger(final Object obj, final Integer defaultValue) {
         if (obj instanceof Integer) { return (Integer) obj; }
         if (obj instanceof Long) { return ((Long) obj).intValue(); }
@@ -70,7 +69,6 @@ public class Json implements Jsonable {
             catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceInteger().");
         return defaultValue;
     }
 
@@ -82,7 +80,6 @@ public class Json implements Jsonable {
             catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceLong().");
         return defaultValue;
     }
 
@@ -93,10 +90,9 @@ public class Json implements Jsonable {
         if (obj instanceof Long) { return Float.valueOf((Long) obj); }
         if (obj instanceof String) {
             try { return Float.parseFloat((String) obj); }
-            catch (final Exception e) { Json.debug("Exception 4: "+ e.getMessage()); }
+            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceFloat().");
         return defaultValue;
     }
 
@@ -110,7 +106,6 @@ public class Json implements Jsonable {
             catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceDouble().");
         return defaultValue;
     }
 
@@ -123,7 +118,6 @@ public class Json implements Jsonable {
             catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceBoolean().");
         return defaultValue;
     }
 
@@ -146,7 +140,6 @@ public class Json implements Jsonable {
 
         if (obj instanceof String) { return Json.fromString((String) obj); }
 
-        // Json.debug("WARNING: Returning default-value for Json._coerceJson().");
         return defaultValue;
     }
 
@@ -407,7 +400,7 @@ public class Json implements Jsonable {
         if (! _isArray) {
             if (_jsonObject.has(key)) {
                 try { return Json._coerce(_jsonObject.get(key), type); }
-                catch (final Exception e) { Json.debug("Exception 4: "+ e.getMessage()); }
+                catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
             }
         }
 
@@ -420,7 +413,7 @@ public class Json implements Jsonable {
         if (_jsonObject.has(key)) {
             if (_jsonObject.isNull(key)) { return null; }
             try { return Json._coerce(_jsonObject.get(key), type); }
-            catch (final Exception e) { Json.debug("Exception 4.5: "+ e.getMessage()); }
+            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
 
         return null;
@@ -440,7 +433,7 @@ public class Json implements Jsonable {
         if (_isArray) {
             if (index < _jsonArray.length() && index >= 0) {
                 try { return _coerce(_jsonArray.get(index), type); }
-                catch (final Exception e) { Json.debug("Exception 5: "+ e.getMessage()); }
+                catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
             }
         }
 
@@ -453,7 +446,7 @@ public class Json implements Jsonable {
         if (index < _jsonArray.length() && index >= 0) {
             if (_jsonArray.isNull(index)) { return null; }
             try { return _coerce(_jsonArray.get(index), type); }
-            catch (final Exception e) { Json.debug("Exception 5.5: "+ e.getMessage()); }
+            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
         }
         return null;
     }
