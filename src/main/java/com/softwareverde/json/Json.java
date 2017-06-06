@@ -24,6 +24,9 @@
 
 package com.softwareverde.json;
 
+import com.softwareverde.json.coercer.Coercer;
+import com.softwareverde.log.LogCallback;
+import com.softwareverde.log.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,113 +42,41 @@ import java.util.*;
  *  used will be smallest unused non-negative integer.
  */
 public class Json implements Jsonable {
-    private synchronized static void debug(final String str) {
-        System.out.println("com.softwareverde.json :: "+ str);
+    public static class Types {
+        public static final String  STRING  = "";
+        public static final Integer INTEGER = 0;
+        public static final Long    LONG    = 0L;
+        public static final Double  DOUBLE  = 0D;
+        public static final Float   FLOAT   = 0F;
+        public static final Boolean BOOLEAN = false;
+        public static final Json    OBJECT  = new Json(false);
+        public static final Json    ARRAY   = new Json(true);
+        public static final Json    JSON    = new Json();
     }
 
-    private static Json _fromString(final String jsonString) throws JSONException {
-        final Json json = new Json();
+    private static final Logger _logger = new Logger();
+    protected static final Coercer _coercer = new Coercer(_logger);
+
+    protected static void _emitWarning(final Exception exception) { _logger.emitWarning(exception); }
+    public static void addLogCallback(final LogCallback logCallback) { _logger.addLogCallback(logCallback); }
+    public static void removeLogCallback(final LogCallback logCallback) { _logger.removeLogCallback(logCallback); }
+
+    protected static Json _parse(final String jsonString) throws JSONException {
         final String trimmedJsonString = jsonString.trim();
+        if (trimmedJsonString.length() == 0) { return new Json(); }
 
-        if (trimmedJsonString.length() > 0) {
-            if (trimmedJsonString.charAt(0) == '[') {
-                json._jsonArray = new JSONArray(trimmedJsonString);
-                json._isArray = true;
-            }
-            else {
-                json._jsonObject = new JSONObject(trimmedJsonString);
-                json._isArray = false;
-            }
+        if (trimmedJsonString.charAt(0) == '[') {
+            return Json.wrap(new JSONArray(trimmedJsonString));
         }
-
-        return json;
-    }
-
-    private static Integer _coerceInteger(final Object obj, final Integer defaultValue) {
-        if (obj instanceof Integer) { return (Integer) obj; }
-        if (obj instanceof Long) { return ((Long) obj).intValue(); }
-        if (obj instanceof String) {
-            try { return Integer.parseInt((String) obj); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
+        else {
+            return Json.wrap(new JSONObject(trimmedJsonString));
         }
-
-        return defaultValue;
-    }
-
-    private static Long _coerceLong(final Object obj, final Long defaultValue) {
-        if (obj instanceof Long) { return (Long) obj; }
-        if (obj instanceof Integer) { return ((Integer) obj).longValue(); }
-        if (obj instanceof String) {
-            try { return Long.parseLong((String) obj); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
-        }
-
-        return defaultValue;
-    }
-
-    private static Float _coerceFloat(final Object obj, final Float defaultValue) {
-        if (obj instanceof Float) { return (Float) obj; }
-        if (obj instanceof Double) { return ((Double) obj).floatValue(); }
-        if (obj instanceof Integer) { return Float.valueOf((Integer) obj); }
-        if (obj instanceof Long) { return Float.valueOf((Long) obj); }
-        if (obj instanceof String) {
-            try { return Float.parseFloat((String) obj); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
-        }
-
-        return defaultValue;
-    }
-
-    private static Double _coerceDouble(final Object obj, final Double defaultValue) {
-        if (obj instanceof Double) { return (Double) obj; }
-        if (obj instanceof Float) { return ((Float) obj).doubleValue(); }
-        if (obj instanceof Integer) { return Double.valueOf((Integer) obj); }
-        if (obj instanceof Long) { return Double.valueOf((Long) obj); }
-        if (obj instanceof String) {
-            try { return Double.parseDouble((String) obj); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
-        }
-
-        return defaultValue;
-    }
-
-    private static Boolean _coerceBoolean(final Object obj, final Boolean defaultValue) {
-        if (obj instanceof Boolean) { return (Boolean) obj; }
-        if (obj instanceof Integer) { return ((Integer) obj > 0); }
-        else if (obj instanceof Long) { return (((Long) obj) > 0L); }
-        else if (obj instanceof String) {
-            try { return (Integer.parseInt((String) obj) > 0); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
-        }
-
-        return defaultValue;
-    }
-
-    private static Json _coerceJson(final Object obj, final Json defaultValue) {
-        if (obj instanceof Jsonable) { return ((Jsonable) obj).toJson(); }
-
-        if (obj instanceof JSONObject) {
-            Json json = new Json();
-            json._jsonObject = (JSONObject) obj;
-            json._isArray = false;
-            return json;
-        }
-
-        if (obj instanceof JSONArray) {
-            Json json = new Json();
-            json._jsonArray = (JSONArray) obj;
-            json._isArray = true;
-            return json;
-        }
-
-        if (obj instanceof String) { return Json.fromString((String) obj); }
-
-        return defaultValue;
     }
 
     public static Boolean isJson(final String string) {
+        if (string == null) { return false; }
         try {
-            _fromString(string);
+            Json._parse(string);
             return true;
         }
         catch (final JSONException e) {
@@ -153,21 +84,40 @@ public class Json implements Jsonable {
         }
     }
 
-    public static Json fromString(final String jsonString) {
+    public static Json parse(final String jsonString) {
+        if (jsonString == null) { return new Json(); }
         try {
-            return _fromString(jsonString);
+            return Json._parse(jsonString);
         }
-        catch (final JSONException e) {
-            Json.debug("Exception: " + e.getMessage());
+        catch (final JSONException exception) {
+            _emitWarning(exception);
             return new Json();
         }
     }
 
-    private Boolean _isArray = false;
-    private JSONObject _jsonObject;
-    private JSONArray _jsonArray;
+    public static Json wrap(final JSONObject jsonObject) {
+        final Json json = new Json();
+        for (final String key : jsonObject.keySet()) {
+            json._jsonObject.put(key, jsonObject.get(key));
+        }
+        json._isArray = false;
+        return json;
+    }
 
-    private String _arrayToString() {
+    public static Json wrap(final JSONArray jsonArray) {
+        final Json json = new Json();
+        for (int i=0; i < jsonArray.length(); ++i) {
+            json._jsonArray.put(jsonArray.get(i));
+        }
+        json._isArray = true;
+        return json;
+    }
+
+    protected final JSONObject _jsonObject;
+    protected final JSONArray _jsonArray;
+    protected Boolean _isArray = false;
+
+    protected String _arrayToString() {
         final JSONArray out = new JSONArray();
         for (int i=0; i<_jsonArray.length(); i++) {
             try {
@@ -185,12 +135,14 @@ public class Json implements Jsonable {
                     out.put(_jsonArray.get(i));
                 }
             }
-            catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+            catch (final JSONException exception) {
+                _emitWarning(exception);
+            }
         }
         return out.toString();
     }
 
-    private String _objectToString() {
+    protected String _objectToString() {
         final JSONObject out = new JSONObject();
         final Iterator<String> it = _jsonObject.keys();
         while (it.hasNext()) {
@@ -209,7 +161,10 @@ public class Json implements Jsonable {
                 else {
                     out.put(key, _jsonObject.get(key));
                 }
-            } catch (JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+            }
+            catch (final JSONException exception) {
+                _emitWarning(exception);
+            }
         }
         return out.toString();
     }
@@ -219,6 +174,13 @@ public class Json implements Jsonable {
         _jsonArray = new JSONArray();
 
         _isArray = true;
+    }
+
+    public Json(final Boolean isArray) {
+        _jsonObject = new JSONObject();
+        _jsonArray = new JSONArray();
+
+        _isArray = isArray;
     }
 
     public <T> Json(final Collection<T> c) {
@@ -254,16 +216,22 @@ public class Json implements Jsonable {
                 final Json json = ((Jsonable) value).toJson();
                 if (json.isArray()) {
                     try { _jsonObject.put(key, json._jsonArray); }
-                    catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                    catch (final JSONException exception) {
+                        _emitWarning(exception);
+                    }
                 }
                 else {
                     try { _jsonObject.put(key, json._jsonObject); }
-                    catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                    catch (final JSONException exception) {
+                        _emitWarning(exception);
+                    }
                 }
             }
             else {
                 try { _jsonObject.put(key, value); }
-                catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                catch (final JSONException exception) {
+                    _emitWarning(exception);
+                }
             }
         }
         _isArray = false;
@@ -302,16 +270,22 @@ public class Json implements Jsonable {
                 final Json json = ((Jsonable) value).toJson();
                 if (json.isArray()) {
                     try { _jsonObject.put(index.toString(), json._jsonArray); }
-                    catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                    catch (final JSONException exception) {
+                        _emitWarning(exception);
+                    }
                 }
                 else {
                     try { _jsonObject.put(index.toString(), json._jsonObject); }
-                    catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                    catch (final JSONException exception) {
+                        _emitWarning(exception);
+                    }
                 }
             }
             else {
                 try { _jsonObject.put(index.toString(), (value == null ? JSONObject.NULL : value)); }
-                catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                catch (final JSONException exception) {
+                    _emitWarning(exception);
+                }
             }
         }
     }
@@ -321,7 +295,9 @@ public class Json implements Jsonable {
         Integer index = 0;
         while (_jsonArray.length() > 0) {
             try { _jsonObject.put(index.toString(), _jsonArray.remove(0)); }
-            catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+            catch (final JSONException exception) {
+                _emitWarning(exception);
+            }
             index++;
         }
         _isArray = false;
@@ -330,16 +306,22 @@ public class Json implements Jsonable {
             final Json json = ((Jsonable) value).toJson();
             if (json.isArray()) {
                 try { _jsonObject.put(key, json._jsonArray); }
-                catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                catch (final JSONException exception) {
+                    _emitWarning(exception);
+                }
             }
             else {
                 try { _jsonObject.put(key, json._jsonObject); }
-                catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+                catch (final JSONException exception) {
+                    _emitWarning(exception);
+                }
             }
         }
         else {
             try { _jsonObject.put(key, (value == null ? JSONObject.NULL : value)); }
-            catch (final JSONException e) { Json.debug("Exception: "+ e.getMessage()); }
+            catch (final JSONException exception) {
+                _emitWarning(exception);
+            }
         }
     }
 
@@ -347,45 +329,6 @@ public class Json implements Jsonable {
         if (_isArray) { return; }
 
         _jsonObject.put(key, (Object) null); // Remove the entity from the JSONObject.
-    }
-
-    public static class Types {
-        public static final String  STRING  = "";
-        public static final Integer INTEGER = 0;
-        public static final Long    LONG    = 0L;
-        public static final Double  DOUBLE  = 0D;
-        public static final Float   FLOAT   = 0F;
-        public static final Boolean BOOLEAN = false;
-        public static final Json    OBJECT  = new Json();
-        public static final Json    ARRAY   = new Json();
-        public static final Json    JSON    = new Json();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static final <T> T _coerce(final Object obj, final T type) {
-        if (type instanceof String) {
-            if (obj instanceof String) { return (T) obj; }
-            return (T) obj.toString();
-        }
-        if (type instanceof Integer)    { return (T) _coerceInteger(obj,    Types.INTEGER); }
-        if (type instanceof Long)       { return (T) _coerceLong(obj,       Types.LONG); }
-        if (type instanceof Double)     { return (T) _coerceDouble(obj,     Types.DOUBLE); }
-        if (type instanceof Float)      { return (T) _coerceFloat(obj,      Types.FLOAT); }
-        if (type instanceof Boolean)    { return (T) _coerceBoolean(obj,    Types.BOOLEAN); }
-        if (type instanceof Jsonable)   { return (T) _coerceJson(obj,       Types.JSON); }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T _getInstance(final T type) {
-        if (type instanceof String)     { return (T) ""; }
-        if (type instanceof Integer)    { return (T) Integer.valueOf(0); }
-        if (type instanceof Long)       { return (T) Long.valueOf(0); }
-        if (type instanceof Float)      { return (T) Float.valueOf(0); }
-        if (type instanceof Double)     { return (T) Double.valueOf(0); }
-        if (type instanceof Boolean)    { return (T) Boolean.valueOf(false); }
-        if (type instanceof Jsonable)       { return (T) new Json(); }
-        return null;
     }
 
     public String getString(final String key)   { return this.get(key, Types.STRING); }
@@ -399,8 +342,10 @@ public class Json implements Jsonable {
     public <T> T get(String key, T type) {
         if (! _isArray) {
             if (_jsonObject.has(key)) {
-                try { return Json._coerce(_jsonObject.get(key), type); }
-                catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
+                try { return _coercer.coerce(_jsonObject.get(key), type); }
+                catch (final Exception exception) {
+                    _emitWarning(exception);
+                }
             }
         }
 
@@ -412,8 +357,10 @@ public class Json implements Jsonable {
 
         if (_jsonObject.has(key)) {
             if (_jsonObject.isNull(key)) { return null; }
-            try { return Json._coerce(_jsonObject.get(key), type); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
+            try { return _coercer.coerce(_jsonObject.get(key), type); }
+            catch (final Exception exception) {
+                _emitWarning(exception);
+            }
         }
 
         return null;
@@ -432,8 +379,10 @@ public class Json implements Jsonable {
     public <T> T get(final Integer index, final T type) {
         if (_isArray) {
             if (index < _jsonArray.length() && index >= 0) {
-                try { return _coerce(_jsonArray.get(index), type); }
-                catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
+                try { return _coercer.coerce(_jsonArray.get(index), type); }
+                catch (final Exception exception) {
+                    _emitWarning(exception);
+                }
             }
         }
 
@@ -445,8 +394,10 @@ public class Json implements Jsonable {
 
         if (index < _jsonArray.length() && index >= 0) {
             if (_jsonArray.isNull(index)) { return null; }
-            try { return _coerce(_jsonArray.get(index), type); }
-            catch (final Exception e) { Json.debug("Exception: "+ e.getMessage()); }
+            try { return _coercer.coerce(_jsonArray.get(index), type); }
+            catch (final Exception exception) {
+                _emitWarning(exception);
+            }
         }
         return null;
     }
@@ -472,6 +423,15 @@ public class Json implements Jsonable {
         }
 
         return keys;
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (object == null) { return false; }
+        if (! (object instanceof Json)) { return false; }
+
+        final Json jsonObject = (Json) object;
+        return this.toString().equals(jsonObject.toString());
     }
 
     @Override
