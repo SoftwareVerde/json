@@ -22,10 +22,8 @@
 //  THE SOFTWARE.
 //  ****************************************************************************
 
-package com.softwareverde.util;
-
-import java.util.Map;
+package com.softwareverde.json;
 
 public interface Jsonable {
-    public Json toJson();
+    Json toJson();
 }

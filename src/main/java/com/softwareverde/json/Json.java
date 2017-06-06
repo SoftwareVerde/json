@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ****************************************************************************
 
-package com.softwareverde.util;
+package com.softwareverde.json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
