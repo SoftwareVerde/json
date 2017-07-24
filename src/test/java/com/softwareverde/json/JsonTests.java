@@ -76,4 +76,17 @@ public class JsonTests {
         Assert.assertEquals(json.get(1, Json.Types.STRING), "Two");
         Assert.assertEquals(json.get(2, Json.Types.STRING), " Three ");
     }
+
+    @Test
+    public void should_return_empty_string_if_null() {
+        // Setup
+        final String validComplexJsonString = "{\"nullString\":null}";
+
+        // Action
+        final Json json = Json.parse(validComplexJsonString);
+
+        // Assert
+        Assert.assertEquals(json.get("nullString", Json.Types.STRING), "");
+        Assert.assertEquals(json.getOrNull("nullString", Json.Types.STRING), null);
+    }
 }

@@ -111,6 +111,7 @@ public class Coercer extends Logger {
     protected String _coerceString(final Object obj, final String defaultValue) {
         if (obj == null) { return defaultValue; }
         if (obj instanceof String) { return (String) obj; }
+        if (obj == JSONObject.NULL) { return defaultValue; }
         return obj.toString();
     }
 
