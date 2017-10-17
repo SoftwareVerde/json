@@ -3,10 +3,11 @@ package com.softwareverde.json.coercer;
 import com.softwareverde.json.Json;
 import com.softwareverde.json.Jsonable;
 import com.softwareverde.log.Logger;
+import com.softwareverde.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class Coercer extends Logger {
+public class Coercer {
     protected final Logger _logger;
 
     protected void _emitWarning(final Exception exception) {
@@ -22,16 +23,12 @@ public class Coercer extends Logger {
         _logger = null;
     }
 
-
     protected Integer _coerceInteger(final Object obj, final Integer defaultValue) {
         if (obj == null) { return defaultValue; }
         if (obj instanceof Integer) { return (Integer) obj; }
         if (obj instanceof Long) { return ((Long) obj).intValue(); }
         if (obj instanceof String) {
-            try { return Integer.parseInt((String) obj); }
-            catch (final Exception exception) {
-                _emitWarning(exception);
-            }
+            return Util.parseInt(obj.toString());
         }
 
         return defaultValue;
@@ -42,10 +39,7 @@ public class Coercer extends Logger {
         if (obj instanceof Long) { return (Long) obj; }
         if (obj instanceof Integer) { return ((Integer) obj).longValue(); }
         if (obj instanceof String) {
-            try { return Long.parseLong((String) obj); }
-            catch (final Exception exception) {
-                _emitWarning(exception);
-            }
+            return Util.parseLong(obj.toString());
         }
 
         return defaultValue;
@@ -58,10 +52,7 @@ public class Coercer extends Logger {
         if (obj instanceof Integer) { return Float.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Float.valueOf((Long) obj); }
         if (obj instanceof String) {
-            try { return Float.parseFloat((String) obj); }
-            catch (final Exception exception) {
-                _emitWarning(exception);
-            }
+            return Util.parseFloat(obj.toString());
         }
 
         return defaultValue;
@@ -74,10 +65,7 @@ public class Coercer extends Logger {
         if (obj instanceof Integer) { return Double.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Double.valueOf((Long) obj); }
         if (obj instanceof String) {
-            try { return Double.parseDouble((String) obj); }
-            catch (final Exception exception) {
-                _emitWarning(exception);
-            }
+            return Util.parseDouble(obj.toString());
         }
 
         return defaultValue;
@@ -89,10 +77,7 @@ public class Coercer extends Logger {
         if (obj instanceof Integer) { return ((Integer) obj > 0); }
         else if (obj instanceof Long) { return (((Long) obj) > 0L); }
         else if (obj instanceof String) {
-            try { return (Integer.parseInt((String) obj) > 0); }
-            catch (final Exception exception) {
-                _emitWarning(exception);
-            }
+            return Util.parseBool(obj.toString());
         }
 
         return defaultValue;
@@ -116,7 +101,7 @@ public class Coercer extends Logger {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T coerce(final Object obj, final T type) {
+    public <T> T coerce(final Object obj, final T type) throws Exception {
         if (type instanceof String)     { return (T) _coerceString(obj,     Json.Types.STRING); }
         if (type instanceof Integer)    { return (T) _coerceInteger(obj,    Json.Types.INTEGER); }
         if (type instanceof Long)       { return (T) _coerceLong(obj,       Json.Types.LONG); }
