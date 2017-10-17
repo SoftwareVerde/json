@@ -7,29 +7,29 @@ public class JsonTests {
     @Test
     public void should_serialize_proper_json_object() {
         // Setup
-        final String validComplexJsonString = "{\"integer\":1,\"string\":\"String\",\"boolean\":true,\"float\":3.1415,\"array\":[\"One\",\"Two\",\"Three\"],\"object\":{\"key1\":1,\"key2\":\"value2\",\"key3\":[]}}";
+        final String jsonString = "{\"integer\":1,\"string\":\"String\",\"boolean\":true,\"float\":3.1415,\"array\":[\"One\",\"Two\",\"Three\"],\"object\":{\"key1\":1,\"key2\":\"value2\",\"key3\":[]}}";
 
         // Action
-        final Json json = Json.parse(validComplexJsonString);
+        final Json json = Json.parse(jsonString);
 
         // Assert
-        Assert.assertEquals(json.get("integer", Json.Types.INTEGER), Integer.valueOf(1));
-        Assert.assertEquals(json.get("integer", Json.Types.STRING), "1");
-        Assert.assertEquals(json.get("string", Json.Types.STRING), "String");
-        Assert.assertEquals(json.get("boolean", Json.Types.BOOLEAN), Boolean.TRUE);
-        Assert.assertEquals(json.get("float", Json.Types.FLOAT), Float.valueOf(3.1415F));
+        Assert.assertEquals(Integer.valueOf(1), json.get("integer", Json.Types.INTEGER));
+        Assert.assertEquals("1", json.get("integer", Json.Types.STRING));
+        Assert.assertEquals("String", json.get("string", Json.Types.STRING));
+        Assert.assertEquals(Boolean.TRUE, json.get("boolean", Json.Types.BOOLEAN));
+        Assert.assertEquals(Float.valueOf(3.1415F), json.get("float", Json.Types.FLOAT));
 
         final Json jsonArray = json.get("array", Json.Types.ARRAY);
-        Assert.assertEquals(jsonArray.length(), Integer.valueOf(3));
-        Assert.assertEquals(jsonArray.get(0, Json.Types.STRING), "One");
-        Assert.assertEquals(jsonArray.get(1, Json.Types.STRING), "Two");
-        Assert.assertEquals(jsonArray.get(2, Json.Types.STRING), "Three");
+        Assert.assertEquals(Integer.valueOf(3), jsonArray.length());
+        Assert.assertEquals("One", jsonArray.get(0, Json.Types.STRING));
+        Assert.assertEquals("Two", jsonArray.get(1, Json.Types.STRING));
+        Assert.assertEquals("Three", jsonArray.get(2, Json.Types.STRING));
 
         final Json jsonObject = json.get("object", Json.Types.OBJECT);
-        Assert.assertEquals(jsonObject.length(), Integer.valueOf(3));
-        Assert.assertEquals(jsonObject.get("key1", Json.Types.STRING), "1");
-        Assert.assertEquals(jsonObject.get("key2", Json.Types.STRING), "value2");
-        Assert.assertEquals(jsonObject.get("key3", Json.Types.ARRAY), new Json(true));
+        Assert.assertEquals(Integer.valueOf(3), jsonObject.length());
+        Assert.assertEquals("1", jsonObject.get("key1", Json.Types.STRING));
+        Assert.assertEquals("value2", jsonObject.get("key2", Json.Types.STRING));
+        Assert.assertEquals(new Json(true), jsonObject.get("key3", Json.Types.ARRAY));
     }
 
     @Test
@@ -59,34 +59,47 @@ public class JsonTests {
         final String jsonString = json.toString();
 
         // Assert
-        Assert.assertEquals(jsonString, expectedJsonString);
+        Assert.assertEquals(expectedJsonString, jsonString);
     }
 
     @Test
     public void should_serialize_simple_array() {
         // Setup
-        final String validComplexJsonString = "\n[\"One\",\n\"Two\",\n\" Three \"]";
+        final String jsonString = "\n[\"One\",\n\"Two\",\n\" Three \"]";
 
         // Action
-        final Json json = Json.parse(validComplexJsonString);
+        final Json json = Json.parse(jsonString);
 
         // Assert
-        Assert.assertEquals(json.length(), Integer.valueOf(3));
-        Assert.assertEquals(json.get(0, Json.Types.STRING), "One");
-        Assert.assertEquals(json.get(1, Json.Types.STRING), "Two");
-        Assert.assertEquals(json.get(2, Json.Types.STRING), " Three ");
+        Assert.assertEquals(Integer.valueOf(3), json.length());
+        Assert.assertEquals("One", json.get(0, Json.Types.STRING));
+        Assert.assertEquals("Two", json.get(1, Json.Types.STRING));
+        Assert.assertEquals(" Three ", json.get(2, Json.Types.STRING));
     }
 
     @Test
     public void should_return_empty_string_if_null() {
         // Setup
-        final String validComplexJsonString = "{\"nullString\":null}";
+        final String jsonString = "{\"nullString\":null}";
 
         // Action
-        final Json json = Json.parse(validComplexJsonString);
+        final Json json = Json.parse(jsonString);
 
         // Assert
-        Assert.assertEquals(json.get("nullString", Json.Types.STRING), "");
-        Assert.assertEquals(json.getOrNull("nullString", Json.Types.STRING), null);
+        Assert.assertEquals("", json.get("nullString", Json.Types.STRING));
+        Assert.assertEquals(null, json.getOrNull("nullString", Json.Types.STRING));
+    }
+
+    @Test
+    public void should_return_true_for_boolean_when_string_true() {
+        // Setup
+        final String jsonString = "{\"trueBoolean\":true}";
+
+        // Action
+        final Json json = Json.parse(jsonString);
+
+        // Assert
+        Assert.assertEquals("", json.get("nullString", Json.Types.STRING));
+        Assert.assertEquals(null, json.getOrNull("nullString", Json.Types.STRING));
     }
 }
