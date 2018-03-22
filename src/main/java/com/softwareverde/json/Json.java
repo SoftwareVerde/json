@@ -1,7 +1,7 @@
 //  ****************************************************************************
 //  The MIT License (MIT)
 //
-//  Copyright (c) 2017 Joshua Green <josh@softwareverde.com>
+//  Copyright (c) 2018 Software Verde <josh@softwareverde.com>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -167,6 +167,19 @@ public class Json implements Jsonable {
             }
         }
         return out.toString();
+    }
+
+    /**
+     * Since Json is mutable, when given a static reference (e.x. Types.JSON), the defaultValue can be mutated statically.
+     *  If this is not prevented, this can cause fairly tricky-to-catch bugs.
+     *  This function detects if the static reference was used, and if so, then a new instance is created.
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> T _getDefaultValueFromType(final T type) {
+        if (type == Types.JSON) { return (T) new Json(); }
+        if (type == Types.ARRAY) { return (T) new Json(true); }
+        if (type == Types.OBJECT) { return (T) new Json(false); }
+        return type;
     }
 
     public Json() {
@@ -337,27 +350,31 @@ public class Json implements Jsonable {
     public Float getFloat(final String key)     { return this.get(key, Types.FLOAT); }
     public Double getDouble(final String key)   { return this.get(key, Types.DOUBLE); }
     public Boolean getBoolean(final String key) { return this.get(key, Types.BOOLEAN); }
-    public Json get(String key)                 { return this.get(key, Json.Types.JSON); }
+    public Json get(String key)                 { return this.get(key, new Json()); }
 
     public <T> T get(String key, T type) {
+        final T defaultValue = _getDefaultValueFromType(type);
+
         if (! _isArray) {
             if (_jsonObject.has(key)) {
-                try { return _coercer.coerce(_jsonObject.get(key), type); }
+                try { return _coercer.coerce(_jsonObject.get(key), defaultValue); }
                 catch (final Exception exception) {
                     _emitWarning(exception);
                 }
             }
         }
 
-        return type;
+        return defaultValue;
     }
 
     public <T> T getOrNull(String key, T type) {
         if (_isArray) { return null; }
 
+        final T defaultValue = _getDefaultValueFromType(type);
+
         if (_jsonObject.has(key)) {
             if (_jsonObject.isNull(key)) { return null; }
-            try { return _coercer.coerce(_jsonObject.get(key), type); }
+            try { return _coercer.coerce(_jsonObject.get(key), defaultValue); }
             catch (final Exception exception) {
                 _emitWarning(exception);
             }
@@ -374,27 +391,31 @@ public class Json implements Jsonable {
     public Boolean getBoolean(final int index)  { return this.get(index, Types.BOOLEAN); }
 
     public Json get(final Integer index) {
-        return this.get(index, Json.Types.JSON);
+        return this.get(index, new Json());
     }
     public <T> T get(final Integer index, final T type) {
+        final T defaultValue = _getDefaultValueFromType(type);
+
         if (_isArray) {
             if (index < _jsonArray.length() && index >= 0) {
-                try { return _coercer.coerce(_jsonArray.get(index), type); }
+                try { return _coercer.coerce(_jsonArray.get(index), defaultValue); }
                 catch (final Exception exception) {
                     _emitWarning(exception);
                 }
             }
         }
 
-        return type;
+        return defaultValue;
     }
 
     public <T> T getOrNull(final Integer index, final T type) {
         if (! _isArray) { return null; }
 
+        final T defaultValue = _getDefaultValueFromType(type);
+
         if (index < _jsonArray.length() && index >= 0) {
             if (_jsonArray.isNull(index)) { return null; }
-            try { return _coercer.coerce(_jsonArray.get(index), type); }
+            try { return _coercer.coerce(_jsonArray.get(index), defaultValue); }
             catch (final Exception exception) {
                 _emitWarning(exception);
             }

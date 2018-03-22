@@ -102,4 +102,85 @@ public class JsonTests {
         Assert.assertEquals("", json.get("nullString", Json.Types.STRING));
         Assert.assertEquals(null, json.getOrNull("nullString", Json.Types.STRING));
     }
+
+    @Test
+    public void should_not_change_static_json_types_when_used_as_default_value() {
+        // Setup
+        final Json json = new Json();
+        final Json expectedValue = new Json();
+
+        // Action
+        final Json defaultedJson = json.get("non-existent");
+        defaultedJson.put("key", Json.parse("{\"key\": \"value\"}"));
+
+        final Json unrelatedDefaultedJson = json.get("non-existent-2");
+        final Json value = unrelatedDefaultedJson.get("key");
+
+        // Assert
+        Assert.assertEquals(expectedValue, value);
+    }
+
+    @Test
+    public void should_not_change_static_json_types_when_used_as_default_value_via_getJson() {
+        // Setup
+        final Json json = new Json();
+        final Json expectedValue = new Json();
+
+        // Action
+        final Json defaultedJson = json.get("non-existent", Json.Types.JSON);
+        defaultedJson.put("key", Json.parse("{\"key\": \"value\"}"));
+
+        final Json unrelatedDefaultedJson = json.get("non-existent-2", Json.Types.JSON);
+        final Json value = unrelatedDefaultedJson.get("key");
+
+        // Assert
+        Assert.assertEquals(expectedValue, value);
+    }
+
+    @Test
+    public void should_not_change_static_json_types_when_used_as_default_value_via_getJsonObject() {
+        // Setup
+        final Json json = new Json();
+        final Json expectedValue = new Json();
+
+        // Action
+        final Json defaultedJson = json.get("non-existent", Json.Types.OBJECT);
+        defaultedJson.put("key", Json.parse("{\"key\": \"value\"}"));
+
+        final Json unrelatedDefaultedJson = json.get("non-existent-2", Json.Types.OBJECT);
+        final Json value = unrelatedDefaultedJson.get("key");
+
+        // Assert
+        Assert.assertEquals(expectedValue, value);
+    }
+
+    @Test
+    public void should_not_change_static_json_types_when_used_as_default_value_via_getJsonArray() {
+        // Setup
+        final Json json = new Json();
+        final Json expectedValue = new Json();
+
+        // Action
+        final Json defaultedJson = json.get("non-existent", Json.Types.ARRAY);
+        defaultedJson.put("key", Json.parse("{\"key\": \"value\"}"));
+
+        final Json unrelatedDefaultedJson = json.get("non-existent-2", Json.Types.ARRAY);
+        final Json value = unrelatedDefaultedJson.get("key");
+
+        // Assert
+        Assert.assertEquals(expectedValue, value);
+    }
+
+    @Test
+    public void should_return_default_value_for_nonexistent_json() {
+        // Setup
+        final Json json = new Json();
+        final Json expectedValue = Json.parse("{\"key\": \"value\"}");
+
+        // Action
+        final Json defaultedJson = json.get("non-existent", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedJson);
+    }
 }
