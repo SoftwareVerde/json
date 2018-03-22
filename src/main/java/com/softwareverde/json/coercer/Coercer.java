@@ -28,7 +28,9 @@ public class Coercer {
         if (obj instanceof Integer) { return (Integer) obj; }
         if (obj instanceof Long) { return ((Long) obj).intValue(); }
         if (obj instanceof String) {
-            return Util.parseInt(obj.toString());
+            final String value = obj.toString();
+            if (! Util.isInt(value)) { return defaultValue; }
+            return Util.parseInt(value);
         }
 
         return defaultValue;
@@ -39,7 +41,9 @@ public class Coercer {
         if (obj instanceof Long) { return (Long) obj; }
         if (obj instanceof Integer) { return ((Integer) obj).longValue(); }
         if (obj instanceof String) {
-            return Util.parseLong(obj.toString());
+            final String value = obj.toString();
+            if (! Util.isLong(value)) { return defaultValue; }
+            return Util.parseLong(value);
         }
 
         return defaultValue;
@@ -52,7 +56,9 @@ public class Coercer {
         if (obj instanceof Integer) { return Float.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Float.valueOf((Long) obj); }
         if (obj instanceof String) {
-            return Util.parseFloat(obj.toString());
+            final String value = obj.toString();
+            if (! Util.isFloat(value)) { return defaultValue; }
+            return Util.parseFloat(value);
         }
 
         return defaultValue;
@@ -65,7 +71,9 @@ public class Coercer {
         if (obj instanceof Integer) { return Double.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Double.valueOf((Long) obj); }
         if (obj instanceof String) {
-            return Util.parseDouble(obj.toString());
+            final String value = obj.toString();
+            if (! Util.isDouble(value)) { return defaultValue; }
+            return Util.parseDouble(value);
         }
 
         return defaultValue;
@@ -77,7 +85,9 @@ public class Coercer {
         if (obj instanceof Integer) { return ((Integer) obj > 0); }
         else if (obj instanceof Long) { return (((Long) obj) > 0L); }
         else if (obj instanceof String) {
-            return Util.parseBool(obj.toString());
+            final String value = obj.toString();
+            if (! Util.isBool(value)) { return defaultValue; }
+            return Util.parseBool(value);
         }
 
         return defaultValue;
@@ -88,7 +98,11 @@ public class Coercer {
         if (obj instanceof Jsonable) { return ((Jsonable) obj).toJson(); }
         if (obj instanceof JSONObject) { return Json.wrap((JSONObject) obj); }
         if (obj instanceof JSONArray) { return Json.wrap((JSONArray) obj); }
-        if (obj instanceof String) { return Json.parse((String) obj); }
+        if (obj instanceof String) {
+            final String value = obj.toString();
+            if (! Json.isJson(value)) { return defaultValue; }
+            return Json.parse(value);
+        }
 
         return defaultValue;
     }
@@ -101,16 +115,16 @@ public class Coercer {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T coerce(final Object obj, final T type) throws Exception {
-        if (type instanceof String)     { return (T) _coerceString(obj,     Json.Types.STRING); }
-        if (type instanceof Integer)    { return (T) _coerceInteger(obj,    Json.Types.INTEGER); }
-        if (type instanceof Long)       { return (T) _coerceLong(obj,       Json.Types.LONG); }
-        if (type instanceof Double)     { return (T) _coerceDouble(obj,     Json.Types.DOUBLE); }
-        if (type instanceof Float)      { return (T) _coerceFloat(obj,      Json.Types.FLOAT); }
-        if (type instanceof Boolean)    { return (T) _coerceBoolean(obj,    Json.Types.BOOLEAN); }
-        if (type instanceof Jsonable)   { return (T) _coerceJson(obj,       Json.Types.JSON); }
+    public <T> T coerce(final Object obj, final T defaultValue) throws Exception {
+        if (defaultValue instanceof String)     { return (T) _coerceString(obj,     (String) defaultValue); }
+        if (defaultValue instanceof Integer)    { return (T) _coerceInteger(obj,    (Integer) defaultValue); }
+        if (defaultValue instanceof Long)       { return (T) _coerceLong(obj,       (Long) defaultValue); }
+        if (defaultValue instanceof Double)     { return (T) _coerceDouble(obj,     (Double) defaultValue); }
+        if (defaultValue instanceof Float)      { return (T) _coerceFloat(obj,      (Float) defaultValue); }
+        if (defaultValue instanceof Boolean)    { return (T) _coerceBoolean(obj,    (Boolean) defaultValue); }
+        if (defaultValue instanceof Jsonable)   { return (T) _coerceJson(obj,       ((Jsonable) defaultValue).toJson()); }
 
-        _emitWarning(new RuntimeException("Unknown object type: "+ type));
+        _emitWarning(new RuntimeException("Unknown object type: "+ defaultValue));
         return null;
     }
 }

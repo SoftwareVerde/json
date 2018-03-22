@@ -183,4 +183,101 @@ public class JsonTests {
         // Assert
         Assert.assertEquals(expectedValue, defaultedJson);
     }
+
+    @Test
+    public void should_return_default_value_for_invalid_integer() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", "seven");
+        final Integer expectedValue = 7;
+
+        // Action
+        final Integer defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_invalid_double() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", "value");
+        final Double expectedValue = 7D;
+
+        // Action
+        final Double defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_invalid_float() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", "value");
+        final Float expectedValue = 7F;
+
+        // Action
+        final Float defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_invalid_boolean() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", "value");
+        final Boolean expectedValue = false;
+
+        // Action
+        final Boolean defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_invalid_true_boolean() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", "value");
+        final Boolean expectedValue = true;
+
+        // Action
+        final Boolean defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_invalid_string() {
+        // Setup
+        final Json json = new Json();
+        json.put("key", null);
+        final String expectedValue = "string";
+
+        // Action
+        final String defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
+
+    @Test
+    public void should_return_default_value_for_nonexistent_string() {
+        // Setup
+        final Json json = new Json();
+        final String expectedValue = "string";
+
+        // Action
+        final String defaultedValue = json.get("key", expectedValue);
+
+        // Assert
+        Assert.assertEquals(expectedValue, defaultedValue);
+    }
 }
