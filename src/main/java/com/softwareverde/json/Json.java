@@ -96,21 +96,11 @@ public class Json implements Jsonable {
     }
 
     public static Json wrap(final JSONObject jsonObject) {
-        final Json json = new Json();
-        for (final String key : jsonObject.keySet()) {
-            json._jsonObject.put(key, jsonObject.get(key));
-        }
-        json._isArray = false;
-        return json;
+        return new Json(jsonObject);
     }
 
     public static Json wrap(final JSONArray jsonArray) {
-        final Json json = new Json();
-        for (int i=0; i < jsonArray.length(); ++i) {
-            json._jsonArray.put(jsonArray.get(i));
-        }
-        json._isArray = true;
-        return json;
+        return new Json(jsonArray);
     }
 
     protected final JSONObject _jsonObject;
@@ -180,6 +170,20 @@ public class Json implements Jsonable {
         if (type == Types.ARRAY) { return (T) new Json(true); }
         if (type == Types.OBJECT) { return (T) new Json(false); }
         return type;
+    }
+
+    protected Json(final JSONObject jsonObject) {
+        _jsonObject = jsonObject;
+        _jsonArray = new JSONArray();
+
+        _isArray = false;
+    }
+
+    protected Json(final JSONArray jsonArray) {
+        _jsonObject = new JSONObject();
+        _jsonArray = jsonArray;
+
+        _isArray = true;
     }
 
     public Json() {
@@ -352,12 +356,15 @@ public class Json implements Jsonable {
     public Boolean getBoolean(final String key) { return this.get(key, Types.BOOLEAN); }
     public Json get(String key)                 { return this.get(key, new Json()); }
 
-    public <T> T get(String key, T type) {
+    public <T> T get(final String key, final T type) {
         final T defaultValue = _getDefaultValueFromType(type);
 
         if (! _isArray) {
             if (_jsonObject.has(key)) {
-                try { return _coercer.coerce(_jsonObject.get(key), defaultValue); }
+                try {
+                    final T t = _coercer.coerce(_jsonObject.get(key), defaultValue);
+                    return t;
+                }
                 catch (final Exception exception) {
                     _emitWarning(exception);
                 }
@@ -367,7 +374,7 @@ public class Json implements Jsonable {
         return defaultValue;
     }
 
-    public <T> T getOrNull(String key, T type) {
+    public <T> T getOrNull(final String key, final T type) {
         if (_isArray) { return null; }
 
         final T defaultValue = _getDefaultValueFromType(type);

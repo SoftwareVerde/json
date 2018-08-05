@@ -95,6 +95,7 @@ public class Coercer {
 
     protected Json _coerceJson(final Object obj, final Json defaultValue) {
         if (obj == null) { return defaultValue; }
+        if (obj instanceof Json) { return ((Json) obj); }
         if (obj instanceof Jsonable) { return ((Jsonable) obj).toJson(); }
         if (obj instanceof JSONObject) { return Json.wrap((JSONObject) obj); }
         if (obj instanceof JSONArray) { return Json.wrap((JSONArray) obj); }
@@ -122,6 +123,7 @@ public class Coercer {
         if (defaultValue instanceof Double)     { return (T) _coerceDouble(obj,     (Double) defaultValue); }
         if (defaultValue instanceof Float)      { return (T) _coerceFloat(obj,      (Float) defaultValue); }
         if (defaultValue instanceof Boolean)    { return (T) _coerceBoolean(obj,    (Boolean) defaultValue); }
+        if (defaultValue instanceof Json)       { return (T) _coerceJson(obj,       ((Json) defaultValue)); }
         if (defaultValue instanceof Jsonable)   { return (T) _coerceJson(obj,       ((Jsonable) defaultValue).toJson()); }
 
         _emitWarning(new RuntimeException("Unknown object type: "+ defaultValue));

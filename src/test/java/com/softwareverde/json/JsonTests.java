@@ -280,4 +280,21 @@ public class JsonTests {
         // Assert
         Assert.assertEquals(expectedValue, defaultedValue);
     }
+
+    @Test
+    public void should_return_original_instance_when_key_exists() {
+        // Setup
+        final Json embeddedJsonArray = new Json(true);
+        embeddedJsonArray.add(Json.parse("{originalKey: \"originalValue\"}"));
+
+        final Json json = new Json();
+        json.put("key", embeddedJsonArray);
+
+        // Action
+        json.get("key").get(0).put("newKey", "newValue");
+
+        // Assert
+        Assert.assertEquals("originalValue", json.get("key").get(0).getString("originalKey"));
+        Assert.assertEquals("newValue", json.get("key").get(0).getString("newKey"));
+    }
 }
