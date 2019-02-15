@@ -107,7 +107,7 @@ public class Json implements Jsonable {
     protected final JSONArray _jsonArray;
     protected Boolean _isArray = false;
 
-    protected String _arrayToString() {
+    protected String _arrayToString(final Integer formatSpacesCount) {
         final JSONArray out = new JSONArray();
         for (int i=0; i<_jsonArray.length(); i++) {
             try {
@@ -129,10 +129,16 @@ public class Json implements Jsonable {
                 _emitWarning(exception);
             }
         }
-        return out.toString();
+
+        if (formatSpacesCount != null) {
+            return out.toString(formatSpacesCount);
+        }
+        else {
+            return out.toString();
+        }
     }
 
-    protected String _objectToString() {
+    protected String _objectToString(final Integer formatSpacesCount) {
         final JSONObject out = new JSONObject();
         final Iterator<String> it = _jsonObject.keys();
         while (it.hasNext()) {
@@ -156,7 +162,13 @@ public class Json implements Jsonable {
                 _emitWarning(exception);
             }
         }
-        return out.toString();
+
+        if (formatSpacesCount != null) {
+            return out.toString(formatSpacesCount);
+        }
+        else {
+            return out.toString();
+        }
     }
 
     /**
@@ -453,6 +465,24 @@ public class Json implements Jsonable {
         return keys;
     }
 
+    public String toFormattedString() {
+        if (_isArray) {
+            return _arrayToString(4);
+        }
+        else {
+            return _objectToString(4);
+        }
+    }
+
+    public String toFormattedString(final Integer spacesIndentCount) {
+        if (_isArray) {
+            return _arrayToString(spacesIndentCount);
+        }
+        else {
+            return _objectToString(spacesIndentCount);
+        }
+    }
+
     @Override
     public boolean equals(final Object object) {
         if (object == null) { return false; }
@@ -465,10 +495,10 @@ public class Json implements Jsonable {
     @Override
     public String toString() {
         if (_isArray) {
-            return _arrayToString();
+            return _arrayToString(null);
         }
         else {
-            return _objectToString();
+            return _objectToString(null);
         }
     }
 
