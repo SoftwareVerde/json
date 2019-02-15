@@ -345,7 +345,7 @@ public class Json implements Jsonable {
     public void remove(final String key) {
         if (_isArray) { return; }
 
-        _jsonObject.put(key, (Object) null); // Remove the entity from the JSONObject.
+        _jsonObject.remove(key);
     }
 
     public String getString(final String key)   { return this.get(key, Types.STRING); }
