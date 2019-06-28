@@ -27,6 +27,8 @@ public class Coercer {
         if (obj == null) { return defaultValue; }
         if (obj instanceof Integer) { return (Integer) obj; }
         if (obj instanceof Long) { return ((Long) obj).intValue(); }
+        if (obj instanceof Double) { return ((Double) obj).intValue(); }
+        if (obj instanceof Float) { return ((Float) obj).intValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isInt(value)) { return defaultValue; }
@@ -40,6 +42,8 @@ public class Coercer {
         if (obj == null) { return defaultValue; }
         if (obj instanceof Long) { return (Long) obj; }
         if (obj instanceof Integer) { return ((Integer) obj).longValue(); }
+        if (obj instanceof Double) { return ((Double) obj).longValue(); }
+        if (obj instanceof Float) { return ((Float) obj).longValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isLong(value)) { return defaultValue; }
@@ -83,8 +87,10 @@ public class Coercer {
         if (obj == null) { return defaultValue; }
         if (obj instanceof Boolean) { return (Boolean) obj; }
         if (obj instanceof Integer) { return ((Integer) obj > 0); }
-        else if (obj instanceof Long) { return (((Long) obj) > 0L); }
-        else if (obj instanceof String) {
+        if (obj instanceof Long) { return (((Long) obj) > 0L); }
+        if (obj instanceof Double) { return ((Double) obj) > 0D; }
+        if (obj instanceof Float) { return ((Float) obj) > 0F; }
+        if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isBool(value)) { return defaultValue; }
             return Util.parseBool(value);
