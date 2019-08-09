@@ -2,27 +2,12 @@ package com.softwareverde.json.coercer;
 
 import com.softwareverde.json.Json;
 import com.softwareverde.json.Jsonable;
-import com.softwareverde.log.Logger;
+import com.softwareverde.logging.Logger;
 import com.softwareverde.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Coercer {
-    protected final Logger _logger;
-
-    protected void _emitWarning(final Exception exception) {
-        if (_logger == null) { return; }
-        _logger.emitWarning(exception);
-    }
-
-    public Coercer(final Logger logger) {
-        _logger = logger;
-    }
-
-    public Coercer() {
-        _logger = null;
-    }
-
     protected Integer _coerceInteger(final Object obj, final Integer defaultValue) {
         if (obj == null) { return defaultValue; }
         if (obj instanceof Integer) { return (Integer) obj; }
@@ -132,7 +117,7 @@ public class Coercer {
         if (defaultValue instanceof Json)       { return (T) _coerceJson(obj,       ((Json) defaultValue)); }
         if (defaultValue instanceof Jsonable)   { return (T) _coerceJson(obj,       ((Jsonable) defaultValue).toJson()); }
 
-        _emitWarning(new RuntimeException("Unknown object type: "+ defaultValue));
+        Logger.warn(Coercer.class, new RuntimeException("Unknown object type: "+ defaultValue));
         return null;
     }
 }

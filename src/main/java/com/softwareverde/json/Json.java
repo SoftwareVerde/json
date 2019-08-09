@@ -25,8 +25,7 @@
 package com.softwareverde.json;
 
 import com.softwareverde.json.coercer.Coercer;
-import com.softwareverde.log.LogCallback;
-import com.softwareverde.log.Logger;
+import com.softwareverde.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,12 +53,7 @@ public class Json implements Jsonable {
         public static final Json    JSON    = new Json();
     }
 
-    private static final Logger _logger = new Logger();
-    protected static final Coercer _coercer = new Coercer(_logger);
-
-    protected static void _emitWarning(final Exception exception) { _logger.emitWarning(exception); }
-    public static void addLogCallback(final LogCallback logCallback) { _logger.addLogCallback(logCallback); }
-    public static void removeLogCallback(final LogCallback logCallback) { _logger.removeLogCallback(logCallback); }
+    protected static final Coercer _coercer = new Coercer();
 
     protected static Json _parse(final String jsonString) throws JSONException {
         final String trimmedJsonString = jsonString.trim();
@@ -79,7 +73,7 @@ public class Json implements Jsonable {
             Json._parse(string);
             return true;
         }
-        catch (final JSONException e) {
+        catch (final JSONException exception) {
             return false;
         }
     }
@@ -90,7 +84,7 @@ public class Json implements Jsonable {
             return Json._parse(jsonString);
         }
         catch (final JSONException exception) {
-            _emitWarning(exception);
+            Logger.warn(Json.class, "Unable to parse json string.", exception);
             return new Json();
         }
     }
@@ -109,7 +103,7 @@ public class Json implements Jsonable {
 
     protected String _arrayToString(final Integer formatSpacesCount) {
         final JSONArray out = new JSONArray();
-        for (int i=0; i<_jsonArray.length(); i++) {
+        for (int i = 0; i < _jsonArray.length(); i++) {
             try {
                 final Object valueObject = _jsonArray.get(i);
                 if (valueObject instanceof Jsonable) {
@@ -126,7 +120,7 @@ public class Json implements Jsonable {
                 }
             }
             catch (final JSONException exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to put json attribute during serialization.", exception);
             }
         }
 
@@ -159,7 +153,7 @@ public class Json implements Jsonable {
                 }
             }
             catch (final JSONException exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to put json attribute during serialization.", exception);
             }
         }
 
@@ -246,20 +240,20 @@ public class Json implements Jsonable {
                 if (json.isArray()) {
                     try { _jsonObject.put(key, json._jsonArray); }
                     catch (final JSONException exception) {
-                        _emitWarning(exception);
+                        Logger.debug(Json.class, "Unable to put json attribute.", exception);
                     }
                 }
                 else {
                     try { _jsonObject.put(key, json._jsonObject); }
                     catch (final JSONException exception) {
-                        _emitWarning(exception);
+                        Logger.debug(Json.class, "Unable to put json attribute.", exception);
                     }
                 }
             }
             else {
                 try { _jsonObject.put(key, value); }
                 catch (final JSONException exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to put json attribute.", exception);
                 }
             }
         }
@@ -300,20 +294,20 @@ public class Json implements Jsonable {
                 if (json.isArray()) {
                     try { _jsonObject.put(index.toString(), json._jsonArray); }
                     catch (final JSONException exception) {
-                        _emitWarning(exception);
+                        Logger.debug(Json.class, "Unable to put json attribute.", exception);
                     }
                 }
                 else {
                     try { _jsonObject.put(index.toString(), json._jsonObject); }
                     catch (final JSONException exception) {
-                        _emitWarning(exception);
+                        Logger.debug(Json.class, "Unable to put json attribute.", exception);
                     }
                 }
             }
             else {
                 try { _jsonObject.put(index.toString(), (value == null ? JSONObject.NULL : value)); }
                 catch (final JSONException exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to put json attribute.", exception);
                 }
             }
         }
@@ -325,7 +319,7 @@ public class Json implements Jsonable {
         while (_jsonArray.length() > 0) {
             try { _jsonObject.put(index.toString(), _jsonArray.remove(0)); }
             catch (final JSONException exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to put json attribute.", exception);
             }
             index++;
         }
@@ -336,20 +330,20 @@ public class Json implements Jsonable {
             if (json.isArray()) {
                 try { _jsonObject.put(key, json._jsonArray); }
                 catch (final JSONException exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to put json attribute.", exception);
                 }
             }
             else {
                 try { _jsonObject.put(key, json._jsonObject); }
                 catch (final JSONException exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to put json attribute.", exception);
                 }
             }
         }
         else {
             try { _jsonObject.put(key, (value == null ? JSONObject.NULL : value)); }
             catch (final JSONException exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to put json attribute.", exception);
             }
         }
     }
@@ -374,11 +368,10 @@ public class Json implements Jsonable {
         if (! _isArray) {
             if (_jsonObject.has(key)) {
                 try {
-                    final T t = _coercer.coerce(_jsonObject.get(key), defaultValue);
-                    return t;
+                    return _coercer.coerce(_jsonObject.get(key), defaultValue);
                 }
                 catch (final Exception exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to get json attribute: " + key, exception);
                 }
             }
         }
@@ -395,7 +388,7 @@ public class Json implements Jsonable {
             if (_jsonObject.isNull(key)) { return null; }
             try { return _coercer.coerce(_jsonObject.get(key), defaultValue); }
             catch (final Exception exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to get json attribute: " + key, exception);
             }
         }
 
@@ -419,7 +412,7 @@ public class Json implements Jsonable {
             if (index < _jsonArray.length() && index >= 0) {
                 try { return _coercer.coerce(_jsonArray.get(index), defaultValue); }
                 catch (final Exception exception) {
-                    _emitWarning(exception);
+                    Logger.debug(Json.class, "Unable to get json attribute: " + index, exception);
                 }
             }
         }
@@ -436,7 +429,7 @@ public class Json implements Jsonable {
             if (_jsonArray.isNull(index)) { return null; }
             try { return _coercer.coerce(_jsonArray.get(index), defaultValue); }
             catch (final Exception exception) {
-                _emitWarning(exception);
+                Logger.debug(Json.class, "Unable to get json attribute: " + index, exception);
             }
         }
         return null;
