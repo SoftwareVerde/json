@@ -17,7 +17,8 @@ public class JsonTests {
         Assert.assertEquals("1", json.get("integer", Json.Types.STRING));
         Assert.assertEquals("String", json.get("string", Json.Types.STRING));
         Assert.assertEquals(Boolean.TRUE, json.get("boolean", Json.Types.BOOLEAN));
-        Assert.assertEquals(Float.valueOf(3.1415F), json.get("float", Json.Types.FLOAT));
+        final Float f = json.get("float", Json.Types.FLOAT);
+        Assert.assertEquals(Float.valueOf(3.1415F), f);
 
         final Json jsonArray = json.get("array", Json.Types.ARRAY);
         Assert.assertEquals(Integer.valueOf(3), jsonArray.length());

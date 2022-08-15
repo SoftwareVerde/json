@@ -7,6 +7,9 @@ import com.softwareverde.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 public class Coercer {
     protected Integer _coerceInteger(final Object obj, final Integer defaultValue) {
         if (obj == null) { return defaultValue; }
@@ -14,6 +17,8 @@ public class Coercer {
         if (obj instanceof Long) { return ((Long) obj).intValue(); }
         if (obj instanceof Double) { return ((Double) obj).intValue(); }
         if (obj instanceof Float) { return ((Float) obj).intValue(); }
+        if (obj instanceof BigInteger) { return ((BigInteger) obj).intValue(); }
+        if (obj instanceof BigDecimal) { return ((BigDecimal) obj).intValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isInt(value)) { return defaultValue; }
@@ -29,6 +34,8 @@ public class Coercer {
         if (obj instanceof Integer) { return ((Integer) obj).longValue(); }
         if (obj instanceof Double) { return ((Double) obj).longValue(); }
         if (obj instanceof Float) { return ((Float) obj).longValue(); }
+        if (obj instanceof BigInteger) { return ((BigInteger) obj).longValue(); }
+        if (obj instanceof BigDecimal) { return ((BigDecimal) obj).longValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isLong(value)) { return defaultValue; }
@@ -44,6 +51,8 @@ public class Coercer {
         if (obj instanceof Double) { return ((Double) obj).floatValue(); }
         if (obj instanceof Integer) { return Float.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Float.valueOf((Long) obj); }
+        if (obj instanceof BigInteger) { return ((BigInteger) obj).floatValue(); }
+        if (obj instanceof BigDecimal) { return ((BigDecimal) obj).floatValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isFloat(value)) { return defaultValue; }
@@ -59,6 +68,8 @@ public class Coercer {
         if (obj instanceof Float) { return ((Float) obj).doubleValue(); }
         if (obj instanceof Integer) { return Double.valueOf((Integer) obj); }
         if (obj instanceof Long) { return Double.valueOf((Long) obj); }
+        if (obj instanceof BigInteger) { return ((BigInteger) obj).doubleValue(); }
+        if (obj instanceof BigDecimal) { return ((BigDecimal) obj).doubleValue(); }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isDouble(value)) { return defaultValue; }
@@ -75,6 +86,8 @@ public class Coercer {
         if (obj instanceof Long) { return (((Long) obj) > 0L); }
         if (obj instanceof Double) { return ((Double) obj) > 0D; }
         if (obj instanceof Float) { return ((Float) obj) > 0F; }
+        if (obj instanceof BigInteger) { return ((BigInteger) obj).longValue() > 0L; }
+        if (obj instanceof BigDecimal) { return ((BigDecimal) obj).doubleValue() > 0D; }
         if (obj instanceof String) {
             final String value = obj.toString();
             if (! Util.isBool(value)) { return defaultValue; }
