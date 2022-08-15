@@ -1,18 +1,15 @@
-group 'com.softwareverde'
-version '2.0.0'
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
 
-apply plugin: 'java'
-apply plugin: 'java-library'
+group = 'com.softwareverde'
+version = '2.0.1'
 
-sourceCompatibility = 1.8
-
-task makeJar(type: Jar) {
-    manifest {
-        attributes  'Implementation-Title': 'Java Json Wrapper',
-                    'Implementation-Version': version
-    }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
@@ -21,11 +18,11 @@ repositories {
 }
 
 dependencies {
-    api                 group: 'org.json',                  name: 'json',           version: '20180813'
-    implementation      group: 'com.github.softwareverde',  name: 'java-logging',   version: 'v1.0.1'
-    implementation      group: 'com.github.softwareverde',  name: 'java-util',      version: 'v2.0.0'
+    api                 group: 'org.json',                  name: 'json',           version: '20220320'
+    implementation      group: 'com.github.softwareverde',  name: 'java-logging',   version: 'v2.3.0'
+    implementation      group: 'com.github.softwareverde',  name: 'java-util',      version: 'v2.7.5'
 
-    testImplementation  group: 'junit',                     name: 'junit',      version: '4.11'
+    testImplementation  group: 'junit',                     name: 'junit',          version: '4.13.2'
 }
 
 tasks.withType(Test) {
@@ -56,14 +53,26 @@ tasks.withType(Test) {
     }
 }
 
+task makeJar(type: Jar) {
+    manifest {
+        attributes  'Implementation-Title': 'Java Json Wrapper',
+                    'Implementation-Version': archiveVersion
+    }
+    with jar
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from sourceSets.main.allSource
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType(Javadoc) {
@@ -73,4 +82,12 @@ tasks.withType(Javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
