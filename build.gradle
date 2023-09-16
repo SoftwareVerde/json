@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.softwareverde'
-version = '2.0.1'
+version = '2.0.2'
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    api                 group: 'org.json',                  name: 'json',           version: '20220320'
+    api                 group: 'org.json',                  name: 'json',           version: '20230618'
     implementation      group: 'com.github.softwareverde',  name: 'java-logging',   version: 'v2.3.0'
     implementation      group: 'com.github.softwareverde',  name: 'java-util',      version: 'v2.7.5'
 
